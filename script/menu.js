@@ -1,6 +1,19 @@
-$('#graph-input').bind('input propertychange', function() {
-    //readGraphFromText($('#graph-input').val());
+/*$('#graph-input').bind('input propertychange', function () {
+    //compareAndChange(readGraphFromText($('#graph-input').val()));
 });
+var timer = null;
+$('#graph-input').keyup(function (e) {
+    console.log(e);
+    clearTimeout(timer);
+    if (!parseInt(String.fromCharCode(e.which))) {
+        alert(e.target.value);
+        compareAndChange(readGraphFromText(e.target.value));
+    } else {
+        timer = setTimeout(function () {
+            compareAndChange(readGraphFromText($('#graph-input').val()))
+        }, 1000);
+    }
+});*/
 
 function dumpGraph() {
     var dump = '';

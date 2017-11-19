@@ -8,20 +8,23 @@ var undirected = true;
 var nodes = new vis.DataSet();
 var edges = new vis.DataSet();
 
-function addNode(x, y) {
-    nodeTypes.push(0);
-    var node = createNode(graphSize, graphSize.toString(), NodeType.NORMAL);
+
+function addNode(x, y, type) {
+    nodeTypes.push(type||0);
+    var node = createNode(graphSize, graphSize.toString(), type||NodeType.NORMAL);
     node.x = x;
     node.y = y;
     nodes.add(node);
-    capacity.forEach(function (array) {
-        array.push(0)
-    });
-    graph.forEach(function (array) {
-        array.push(false);
-    });
-    capacity.push(new Array(graphSize + 1).fill(0));
-    graph.push(new Array(graphSize + 1).fill(false));
+    if (capacity.length <= graphSize) {
+        capacity.forEach(function (array) {
+            array.push(0)
+        });
+        graph.forEach(function (array) {
+            array.push(false);
+        });
+        capacity.push(new Array(graphSize + 1).fill(0));
+        graph.push(new Array(graphSize + 1).fill(false));
+    }
     graphSize++;
     graphChanged();
 }
@@ -58,25 +61,63 @@ function removeEdge(id) {
     }
 }
 
+function removeNode() {
+    nodes.remove(graphSize - 1);
+    graphSize--;
+}
+
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function graphChanged() {
     //todo:mb remove
 }
 
-function readGraphFromText(text) {
-    var data = text
-        .split(/[ \n]+/)
-        .map(function(x){return parseInt(x);})
-        .filter(function(x){return x;});
-    console.log(data);
-    var n = data[0];
-    var m = data[1];
-    for (var i = 2; i < 3*m+2;i+=3) {
-        var edge = {};
-        edge.from = data[i];
-        edge.to = data[i+1];
-        edge.capacity = data[i+2];
-        console.log(edge);
+function compareAndChange(newGraph) {
+    if (newGraph.size != graphSize) {
+        while(graphSize > newGraph.size) {
+            removeNode();
+        }
+        while(graphSize < newGraph.size) {
+            addNode();
+        }
     }
+    for (var i = 0; i < edgesNumber; i++) {
+        var edge = edges.get(i);
+        var found = false;
+        newGraph.edges.forEach(function(newEdge) {
+           //if (edge)
+        });
+    }
+    for (var i = 0; i < newGraph.edges.length; i++) {
+
+    }
+}
+
+function readGraphFromText(text) {
+    var lines = text.split('\n');
+    var graph = {};
+    graph.size = parseInt(lines[0].split(' ')[0]);
+    graph.source = parseInt(lines[0].split(' ')[1]);
+    graph.sink = parseInt(lines[0].split(' ')[2]);
+    if (!graph.size) {
+        return null;
+    }
+    graph.edges = [];
+    for (var i = 1; i < lines.length; i++) {
+        var numbers = lines[i].split(' ').map(function (x) {
+            return parseInt(x);
+        });
+        var edge = {from: numbers[0], to: numbers[1], capacity: numbers[2]};
+        if (edge.from > edge.to) {
+            edge = {from: numbers[1], to: numbers[0], capacity: numbers[2]};
+        }
+        if (edge.from && edge.to && edge.capacity && edge.to!=edge.from) {
+            graph.edges.push(edge);
+        }
+    }
+    return graph;
 }
 
 var EdgeType = {
@@ -99,7 +140,7 @@ function createNode(id, label, type) {
 
 var globalOptions = {
     physics: {
-        enabled:true,
+        enabled: true,
         stabilization: {
             enabled: true,
             iterations: 10,
