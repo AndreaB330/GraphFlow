@@ -1,18 +1,38 @@
 <html>
 <head>
+    <link href="external/buttons/css/style.css" rel="stylesheet" type="text/css"/>
+
     <script type="text/javascript" src="script/jquery.min.js"></script>
     <script type="text/javascript" src="script/vis.min.js"></script>
     <script type="text/javascript" src="script/graph.js"></script>
     <script type="text/javascript" src="script/events.js"></script>
     <link href="css/vis.min.css" rel="stylesheet" type="text/css"/>
     <link href="css/style.css" rel="stylesheet" type="text/css"/>
+
 </head>
 <body>
 <div class="content">
     <div id="menu">
-        <div id="information"></div>
+        <div class = "row">
+            Physics:
+            <label class="switch">
+                <input type="checkbox" onchange="switchPhysics(this);" checked>
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class = "row">
+            Directed:
+            <label class="switch">
+                <input type="checkbox" onchange="switchDirected(this);">
+                <span class="slider round"></span>
+            </label>
+        </div>
+        <div class = "row">
+            <div class="button blue" style="margin-right:6px" onclick="resetGraph()">Reset</div>
+            <div class="button red" onclick="runMaxFlow()">Run flow</div>
+        </div>
+
         <textarea id="graph-input" class="graph" type="text"></textarea>
-        <div class="button" onclick="runMaxFlow()">Floooow!</div>
     </div>
     <div id="mynetwork"></div>
     <script type="text/javascript" src="script/menu.js"></script>

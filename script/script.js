@@ -22,7 +22,7 @@ window.onload = function () {
 };
 
 function randomGraph() {
-    var size = 52;
+    var size = 3;
     addNode(-10, 0, 1);
     for (var i = 1; i < size - 1; i++) {
         addNode();
@@ -32,6 +32,7 @@ function randomGraph() {
     for (var j = 0; j < size * 2; j++) {
         addEdge(getRandomInt(0, size - 1), getRandomInt(0, size - 1));
     }
+    dumpGraph();
 }
 
 randomGraph();
