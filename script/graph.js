@@ -15,8 +15,8 @@ var edges = new vis.DataSet();
 function addNode(x, y, type) {
     nodeTypes.push(type || 0);
     var node = createNode(graphSize, graphSize.toString(), type || NodeType.NORMAL);
-    node.x = x;
-    node.y = y;
+    node.x = x || getRandomInt(-60,60);
+    node.y = y || getRandomInt(-60,60);
     nodes.add(node);
     if (capacity.length <= graphSize) {
         capacity.forEach(function (array) {
@@ -148,7 +148,7 @@ function readGraphFromText(text) {
             return parseInt(x);
         });
         var edge = {from: numbers[0], to: numbers[1], capacity: numbers[2]};
-        if ((edge.from || edge.from === 0) && (edge.to || edge.to === 0) && edge.capacity && edge.to != edge.from) {
+        if ((edge.from || edge.from === 0) && (edge.to || edge.to === 0) && edge.to != edge.from) {
             graph.edges.push(edge);
         }
     }
@@ -201,16 +201,16 @@ var globalOptions = {
             fit: true
         },
         barnesHut: {
-            damping: 0.15,
-            springConstant: 0.001
+            damping: 0.1,
+            springConstant: 0.01
         }
     },
     edges: {
         smooth: false
     },
     interaction: {
-        dragView: false,
-        zoomView: false
+        dragView: true,
+        zoomView: true
     }
 };
 
