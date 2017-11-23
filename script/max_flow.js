@@ -2,6 +2,7 @@ function makeFlowStep(sources, sinks, residualCapacity) {
     var queue = sources.slice();
     var used = new Array(graphSize).fill(false);
     var previous = new Array(graphSize).fill(-1);
+
     sources.forEach(function (source) {
         used[source] = true;
         previous[source] = source;
@@ -18,10 +19,10 @@ function makeFlowStep(sources, sinks, residualCapacity) {
         }
     }
 
-    for (var i = 0; i < sinks.length; i++) {
+    for (var i = 0; i < sinks.length; i++) { //Find used sink, build path and run next step
         if (!used[sinks[i]]) continue;
         var node = sinks[i];
-        var flow = 10000000;//todo: big magic const
+        var flow = Infinity;
         while (previous[node] != node) {
             flow = Math.min(flow, residualCapacity[previous[node]][node]);
             node = previous[node];
@@ -40,17 +41,16 @@ function makeFlowStep(sources, sinks, residualCapacity) {
             var edge = edges.get(Math.abs(id));
             var width = Math.abs(capacity[edge.from][edge.to] - residualCapacity[edge.from][edge.to]);
             var label = (width - flow) + '/' + capacity[edge.from][edge.to] + '\n+' + flow;
-            changeEdgeStyle(edge.id, '#33EE33', label, 6, (id > 0), (id < 0))
+            changeEdgeStyle(edge.id, '#33EE33', label, 7, (id > 0), (id < 0))
         });
 
         setTimeout(function () {
             edgeIds.forEach(function (id) {
                 var edge = edges.get(Math.abs(id));
-                var width = (capacity[edge.from][edge.to] - residualCapacity[edge.from][edge.to]);
+                var width = Math.abs(capacity[edge.from][edge.to] - residualCapacity[edge.from][edge.to]);
+                var label = width + '/' + capacity[edge.from][edge.to];
                 if (width) {
-                    var label = Math.abs(width) + '/' + capacity[edge.from][edge.to];
-                    if (residualCapacity)
-                    changeEdgeStyle(edge.id, '#EE3333', label, 6, (width > 0), (width < 0))
+                    changeEdgeStyle(edge.id, '#EE3333', label, 7, (width > 0), (width < 0));
                 } else {
                     resetEdgeStyle(edge.id);
                 }
@@ -67,13 +67,14 @@ function runMaxFlow() {
     var residualCapacity = capacity.map(function (array) {
         return array.slice();
     });//COPY
+
     var sources = [];
     var sinks = [];
     for (var i = 0; i < graphSize; i++) {
-        if (nodeTypes[i] == 1) {
+        if (nodeTypes[i] == NodeType.FLOW_SOURCE) {
             sources.push(i);
         }
-        if (nodeTypes[i] == 2) {
+        if (nodeTypes[i] == NodeType.FLOW_SINK) {
             sinks.push(i);
         }
     }

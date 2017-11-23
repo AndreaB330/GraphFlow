@@ -8,15 +8,20 @@ var edgeId = [];
 var graph = []; //adjacency matrix
 
 var undirected = true;
+var showLabels = true;
 
 var nodes = new vis.DataSet();
 var edges = new vis.DataSet();
 
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function addNode(x, y, type) {
     nodeTypes.push(type || 0);
     var node = createNode(graphSize, graphSize.toString(), type || NodeType.NORMAL);
-    node.x = x || getRandomInt(-60,60);
-    node.y = y || getRandomInt(-60,60);
+    node.x = x || getRandomInt(-60, 60);
+    node.y = y || getRandomInt(-60, 60);
     nodes.add(node);
     if (capacity.length <= graphSize) {
         capacity.forEach(function (array) {
@@ -36,13 +41,19 @@ function addNode(x, y, type) {
     graphSize++;
 }
 
+function removeNode() {
+    nodes.remove(graphSize - 1);
+    nodeTypes[graphSize - 1] = 0;
+    graphSize--;
+}
+
 function addEdge(from, to, cap) {
     if (graph[from][to] || undirected && graph[to][from] || from === to) {
         return;
     }
-    cap = cap || getRandomInt(1, 23);
+    cap = (cap !== 0 ? cap || getRandomInt(1, 23) : cap);
     edges.add(createEdge(edgesNumber, from, to, (undirected ? EdgeType.NORMAL : EdgeType.DIRECTED)));
-    edges.update({id: edgesNumber, label: '0/' + cap});
+    edges.update({id: edgesNumber, label: (showLabels ? '0/' + cap : undefined)});
     capacity[from][to] = cap;
     graph[from][to] = true;
     edgeId[from][to] = edgesNumber;
@@ -72,12 +83,6 @@ function removeEdge(id) {
     }
 }
 
-function removeNode() {
-    nodes.remove(graphSize - 1);
-    nodeTypes[graphSize - 1] = 0;
-    graphSize--;
-}
-
 function resetEdgeStyle(id) {
     edges.update($.extend({id: id}, edgeOptions[(undirected ? EdgeType.NORMAL : EdgeType.DIRECTED)]));
 }
@@ -87,8 +92,15 @@ function switchNodeType(node, type) {
     nodes.update($.extend({id: node}, nodeOptions[type]));
 }
 
-function getRandomInt(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+function changeEdgeStyle(id, color, label, width, arrowToEnabled, arrowFromEnabled) {
+    edges.update({
+        id: id,
+        color: {color: color, highlight: color, hover: color},
+        label: (showLabels ? label : 0),
+        width: width,
+        arrows: {to: {enabled: arrowToEnabled}, from: {enabled: arrowFromEnabled}}
+    });
+
 }
 
 function rebuildGraph(newGraph) {
@@ -105,22 +117,24 @@ function rebuildGraph(newGraph) {
         if (!edge) {
             continue;
         }
-        var newEdge;
+        var edgeToChange;
         newGraph.edges.forEach(function (newEdge) {
             if (edge.from == newEdge.from && edge.to == newEdge.to) {
-                newEdge = newEdge;
+                edgeToChange = newEdge;
             }
             if (undirected && edge.from == newEdge.to && edge.to == newEdge.from) {
-                newEdge = newEdge;
+                edgeToChange = newEdge;
             }
         });
-        if (newEdge) {
-            if (newEdge.capacity != capacity[edge.from][edge.to]) {
-                capacity[edge.from][edge.to] = newEdge.capacity;
+        if (edgeToChange) {
+            if (edgeToChange.capacity != capacity[edge.from][edge.to] && (edgeToChange.capacity || edgeToChange.capacity === 0)) {
+                capacity[edge.from][edge.to] = edgeToChange.capacity;
                 if (undirected) {
-                    capacity[edge.to][edge.from] = newEdge.capacity;
+                    capacity[edge.to][edge.from] = edgeToChange.capacity;
                 }
-                edges.update({id: edge.id, label: ' 0/' + newEdge.capacity + ' '});
+                edges.update({
+                    id: edge.id, label: (showLabels ? ' 0/' + edgeToChange.capacity + ' ' : undefined)
+                });
             }
         } else {
             removeEdge(edge.id);
@@ -137,8 +151,6 @@ function readGraphFromText(text) {
     var lines = text.split('\n');
     var graph = {};
     graph.size = parseInt(lines[0].split(' ')[0]);
-    graph.source = parseInt(lines[0].split(' ')[1]);
-    graph.sink = parseInt(lines[0].split(' ')[2]);
     if (graph.size !== 0 && !graph.size) {
         return null;
     }
@@ -155,22 +167,6 @@ function readGraphFromText(text) {
     return graph;
 }
 
-function changeEdgeStyle(id ,color, label, width, arrowTo, arrowFrom) {
-    edges.update({
-        id: id, color: {color: color, highlight: color, hover: color}
-    });
-    edges.update({
-        id: id, label: label
-    });
-    edges.update({
-        id: id, width: width
-    });
-    edges.update({
-        id: id, arrows: {to: {enabled: arrowTo}, from: {enabled: arrowFrom}}
-    });
-
-}
-
 var EdgeType = {
     NORMAL: 0,
     DIRECTED: 1
@@ -178,8 +174,8 @@ var EdgeType = {
 
 var NodeType = {
     NORMAL: 0,
-    SOURCE: 1,
-    SINK: 2
+    FLOW_SOURCE: 1,
+    FLOW_SINK: 2
 };
 
 function createEdge(id, from, to, type) {
@@ -190,32 +186,23 @@ function createNode(id, label, type) {
     return $.extend({id: id, label: label}, nodeOptions[type]);
 }
 
+//VIS.JS options
 var globalOptions = {
     physics: {
         enabled: false,
         stabilization: {
             enabled: true,
-            iterations: 10,
+            iterations: 100,
             updateInterval: 100,
             onlyDynamicEdges: false,
             fit: true
         },
         barnesHut: {
             damping: 0.1,
-            springConstant: 0.01
+            springConstant: 0.02
         }
     },
     edges: {
-        smooth: false
-    },
-    interaction: {
-        dragView: true,
-        zoomView: true
-    }
-};
-
-var edgeOptions = [
-    {
         arrows: {
             to: {
                 enabled: false
@@ -224,14 +211,8 @@ var edgeOptions = [
                 enabled: false
             }
         },
+        smooth: false,
         chosen: true,
-        color: {
-            color: '#517cff',
-            highlight: '#517cff',
-            hover: '#517cff',
-            inherit: 'from',
-            opacity: 1.0
-        },
         font: {
             color: '#FFFFFF',
             size: 18, // px
@@ -240,58 +221,62 @@ var edgeOptions = [
             strokeWidth: 0,
             align: 'horizontal'
         },
-        label: " 0/1 ",
         labelHighlightBold: true,
         selectionWidth: 1,
         selfReferenceSize: 20,
-        smooth: false,
-        title: undefined,
-        value: undefined,
         width: 3,
         widthConstraint: false
     },
-    {
-        arrows: {
-            to: {
-                enabled: true
-            }
+    nodes: {
+        borderWidth: 2,
+        borderWidthSelected: 3,
+        font: {
+            color: '#343434',
+            size: 18,
+            face: 'Consolas',
+            strokeWidth: 0,
+            align: 'center',
+            vadjust: -40
         },
-        chosen: true,
+        shape: 'dot',
+        size: 20
+    },
+    interaction: {
+        dragView: true,
+        zoomView: true
+    }
+};
+
+var edgeOptions = [
+    {//UNDIRECTED EDGE
         color: {
             color: '#517cff',
             highlight: '#517cff',
-            hover: '#517cff',
-            inherit: 'from',
-            opacity: 1.0
+            hover: '#517cff'
         },
-        font: {
-            color: '#FFFFFF',
-            size: 18, // px
-            face: 'Consolas',
-            background: '#343434',
-            strokeWidth: 0,
-            align: 'horizontal'
+        smooth: false
+    },
+    {//DIRECTED EDGE
+        color: {
+            color: '#517cff',
+            highlight: '#517cff',
+            hover: '#517cff'
         },
-        label: " 0/1 ",
-        labelHighlightBold: true,
-        selectionWidth: 1,
-        selfReferenceSize: 20,
         smooth: {
             enabled: true,
             type: 'curvedCW',
             roundness: 0.15
         },
-        title: undefined,
-        value: undefined,
-        width: 3,
-        widthConstraint: false
+        arrows: {
+            to: {
+                enabled: true
+            }
+        }
     }
 ];
 
 var nodeOptions = [
     {//NORMAL
-        borderWidth: 2,
-        borderWidthSelected: 3,
         color: {
             border: '#2B7CE9',
             background: '#97C2FC',
@@ -303,22 +288,9 @@ var nodeOptions = [
                 border: '#2B7CE9',
                 background: '#D2E5FF'
             }
-        },
-        font: {
-            color: '#343434',
-            size: 18,
-            face: 'Consolas',
-            strokeWidth: 0,
-            align: 'center',
-            vadjust: -40
-        },
-        shape: 'dot',
-        size: 20,
-        fixed: false
+        }
     },
-    {//SOURCE
-        borderWidth: 2,
-        borderWidthSelected: 3,
+    {//FLOW_SOURCE
         color: {
             border: '#20c332',
             background: '#bdfcd0',
@@ -330,22 +302,9 @@ var nodeOptions = [
                 border: '#20c332',
                 background: '#bdfcd0'
             }
-        },
-        font: {
-            color: '#343434',
-            size: 18,
-            face: 'Consolas',
-            strokeWidth: 0,
-            align: 'center',
-            vadjust: -40
-        },
-        shape: 'dot',
-        size: 20,
-        fixed: false
+        }
     },
-    {//SINK
-        borderWidth: 2,
-        borderWidthSelected: 3,
+    {//FLOW_SINK
         color: {
             border: '#e9cf32',
             background: '#f1fc94',
@@ -357,18 +316,7 @@ var nodeOptions = [
                 border: '#e9cf32',
                 background: '#f1fc94'
             }
-        },
-        font: {
-            color: '#343434',
-            size: 18,
-            face: 'Consolas',
-            strokeWidth: 0,
-            align: 'center',
-            vadjust: -40
-        },
-        shape: 'dot',
-        size: 20,
-        fixed: false
+        }
     }
 ];
 

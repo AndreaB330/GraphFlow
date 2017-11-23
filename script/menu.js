@@ -27,6 +27,7 @@ function resetGraph() {
     for (var i = 1; i < edgesNumber; i++) {
         removeEdge(i);
     }
+    edgesNumber = 1;
     rebuildGraph(readGraphFromText($("#graph-input").val()));
 }
 
@@ -41,4 +42,9 @@ function switchDirected(checkbox) {
 
 function switchPhysics(checkbox) {
     network.setOptions({physics: {enabled: checkbox.checked}});
+}
+
+function switchLabels(checkbox) {
+    showLabels = checkbox.checked;
+    resetGraph();
 }
