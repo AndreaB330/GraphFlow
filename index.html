@@ -13,35 +13,41 @@
 <body>
 <div class="content">
     <div id="menu">
-        <div class = "row">
+        <div class="row">
             Physics:
             <label class="switch">
                 <input type="checkbox" onchange="switchPhysics(this);">
                 <span class="slider round"></span>
             </label>
         </div>
-        <div class = "row">
+        <div class="row">
             Directed:
             <label class="switch">
                 <input type="checkbox" onchange="switchDirected(this);">
                 <span class="slider round"></span>
             </label>
         </div>
-        <div class = "row">
+        <div class="row">
             Show edge labels:
             <label class="switch">
                 <input type="checkbox" onchange="switchLabels(this);" checked>
                 <span class="slider round"></span>
             </label>
         </div>
-        <div class = "row">
+        <div class="row">
             <div class="button blue" style="margin-right:6px" onclick="resetGraph()">Reset</div>
             <div class="button red" onclick="runMaxFlow()">Run flow</div>
         </div>
         <textarea id="graph-input" class="graph" type="text"></textarea>
-        <div class = "row">
-            <span class="green-text">Green</span> - sources. </br>
-            <span class="orange-text">Orange</span> - sinks.
+        <div class="row">
+            <span class="green-text">Green</span> - sources. <br/>
+            <span class="orange-text">Orange</span> - sinks. <br/>
+            <span style="font-size: 12px">
+                <br/><b>Controls:</b><br/>
+                Add node: [DoubleClick]<br/>
+                Set source/sink: [DoubleClick]<br/>
+                Delete edge: [DoubleClick]<br/>
+                Add edge: [Click]</span>
         </div>
     </div>
     <div id="mynetwork"></div>

@@ -47,8 +47,8 @@ function makeFlowStep(sources, sinks, residualCapacity) {
         setTimeout(function () {
             edgeIds.forEach(function (id) {
                 var edge = edges.get(Math.abs(id));
-                var width = Math.abs(capacity[edge.from][edge.to] - residualCapacity[edge.from][edge.to]);
-                var label = width + '/' + capacity[edge.from][edge.to];
+                var width = (capacity[edge.from][edge.to] - residualCapacity[edge.from][edge.to]);
+                var label = Math.abs(width) + '/' + capacity[edge.from][edge.to];
                 if (width) {
                     changeEdgeStyle(edge.id, '#EE3333', label, 7, (width > 0), (width < 0));
                 } else {
