@@ -3,19 +3,16 @@ var events = {
     doubleClick: function doubleClick(params) {
         if (params.nodes.length === 0 && params.edges.length === 0) {
             addNode(params.pointer.canvas.x, params.pointer.canvas.y);
-            dumpGraph();
         } else {
             params.nodes.forEach(function (node) {
-                var data = nodeOptions[nodeTypes[node] = (nodeTypes[node] + 1) % 3];
-                nodes.update($.extend({id: node}, data));
-                dumpGraph();
+                switchNodeType(node,(nodeTypes[node] + 1) % 3);
             });
             if (params.nodes.length === 0) {
                 removeEdge(params.edges[0]);
-                dumpGraph();
             }
         }
         events.selectedNode = -1;
+        dumpGraph();
         updateInformation();
     },
     click: function click(params) {

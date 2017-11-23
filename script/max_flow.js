@@ -1,11 +1,13 @@
-var residualCapacity = []
-
-function makeFlowStep(source, sink, residualCapacity) {
-    var queue = [source];
+function makeFlowStep(sources, sinks, residualCapacity) {
+    var queue = sources.slice();
     var used = new Array(graphSize).fill(false);
-    var previous = new Array(graphSize).fill(source);
-    used[source] = true;
-    while (queue.length > 0) {
+    var previous = new Array(graphSize).fill(-1);
+    sources.forEach(function (source) {
+        used[source] = true;
+        previous[source] = source;
+    });
+
+    while (queue.length > 0) { //BFS
         var current = queue.shift();
         for (var i = 0; i < graphSize; i++) {
             if (residualCapacity[current][i] > 0 && !used[i]) {
@@ -16,15 +18,16 @@ function makeFlowStep(source, sink, residualCapacity) {
         }
     }
 
-    if (used[sink]) {
-        var node = sink;
-        var flow = 10000000;//todo: magic const
+    for (var i = 0; i < sinks.length; i++) {
+        if (!used[sinks[i]]) continue;
+        var node = sinks[i];
+        var flow = 10000000;//todo: big magic const
         while (previous[node] != node) {
             flow = Math.min(flow, residualCapacity[previous[node]][node]);
             node = previous[node];
         }
-        console.log('Flow: ' + flow);
-        node = sink;
+
+        node = sinks[i];
         var edgeIds = [];
         while (previous[node] != node) {
             residualCapacity[previous[node]][node] -= flow;
@@ -36,12 +39,8 @@ function makeFlowStep(source, sink, residualCapacity) {
         edgeIds.forEach(function (id) {
             var edge = edges.get(Math.abs(id));
             var width = Math.abs(capacity[edge.from][edge.to] - residualCapacity[edge.from][edge.to]);
-            edges.update({
-                id: edge.id, color: {color: '#33EE33', highlight: '#33EE33', hover: '#33EE33'},
-                width: 6,
-                label: (width - flow) + '/' + capacity[edge.from][edge.to] + '\n+' + flow,
-                arrows: {to: {enabled: (id > 0)}, from: {enabled: (id < 0)}}
-            });
+            var label = (width - flow) + '/' + capacity[edge.from][edge.to] + '\n+' + flow;
+            changeEdgeStyle(edge.id, '#33EE33', label, 6, (id > 0), (id < 0))
         });
 
         setTimeout(function () {
@@ -49,35 +48,35 @@ function makeFlowStep(source, sink, residualCapacity) {
                 var edge = edges.get(Math.abs(id));
                 var width = (capacity[edge.from][edge.to] - residualCapacity[edge.from][edge.to]);
                 if (width) {
-                    edges.update({
-                        id: edge.id, color: {color: '#EE3333', highlight: '#EE3333', hover: '#EE3333'},
-                        width: 6,
-                        label: ' ' + Math.abs(width) + '/' + capacity[edge.from][edge.to],
-                        arrows: {to: {enabled: (width > 0)}, from: {enabled: (width < 0)}}
-                    });
+                    var label = Math.abs(width) + '/' + capacity[edge.from][edge.to];
+                    changeEdgeStyle(edge.id, '#EE3333', label, 6, (width > 0), (width < 0))
                 } else {
-                    resetEdge(edge.id);
+                    resetEdgeStyle(edge.id);
                 }
             });
         }, 2000);
 
-        setTimeout(makeFlowStep, 3000, source, sink, residualCapacity);
+        setTimeout(makeFlowStep, 3000, sources, sinks, residualCapacity);
+        break;
     }
 }
 
 function runMaxFlow() {
-    residualCapacity = capacity.map(function (array) {
+    resetGraph();
+    var residualCapacity = capacity.map(function (array) {
         return array.slice();
     });//COPY
-    var source = -1;
-    var sink = -1;
+    var sources = [];
+    var sinks = [];
     for (var i = 0; i < graphSize; i++) {
         if (nodeTypes[i] == 1) {
-            source = i;
+            sources.push(i);
         }
         if (nodeTypes[i] == 2) {
-            sink = i;
+            sinks.push(i);
         }
     }
-    makeFlowStep(source, sink, residualCapacity);
+    if (sources.length && sinks.length) {
+        setTimeout(makeFlowStep, 500, sources, sinks, residualCapacity);
+    }
 }

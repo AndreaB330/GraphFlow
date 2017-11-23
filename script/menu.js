@@ -1,14 +1,12 @@
-$('#graph-input').bind('input propertychange', function () {
-    //compareAndChange(readGraphFromText($('#graph-input').val()));
-});
 var timer = null;
-$('#graph-input').keyup(function (e) {
+
+$("#graph-input").keyup(function (e) {
     clearTimeout(timer);
     if (!parseInt(String.fromCharCode(e.which))) {
-        compareAndChange(readGraphFromText(e.target.value));
+        rebuildGraph(readGraphFromText(e.target.value));
     } else {
         timer = setTimeout(function () {
-            compareAndChange(readGraphFromText($('#graph-input').val()))
+            rebuildGraph(readGraphFromText($("#graph-input").val()))
         }, 1000);
     }
 });
@@ -22,22 +20,23 @@ function dumpGraph() {
             dump += edge.from + ' ' + edge.to + ' ' + capacity[edge.from][edge.to] + '\n';
         }
     }
-    $('#graph-input').val(dump);
+    $("#graph-input").val(dump);
 }
 
 function resetGraph() {
     for (var i = 1; i < edgesNumber; i++) {
         removeEdge(i);
     }
-    compareAndChange(readGraphFromText($('#graph-input').val()));
+    rebuildGraph(readGraphFromText($("#graph-input").val()));
 }
 
 function switchDirected(checkbox) {
+    //remove all edges and
     for (var i = 1; i < edgesNumber; i++) {
         removeEdge(i);
     }
     undirected = !checkbox.checked;
-    compareAndChange(readGraphFromText($('#graph-input').val()));
+    rebuildGraph(readGraphFromText($("#graph-input").val()));
 }
 
 function switchPhysics(checkbox) {

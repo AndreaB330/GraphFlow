@@ -90,13 +90,20 @@ textarea.graph {
     background-color: #3783db;
 }
 
+.green-text {
+    color: #20c332;
+}
+
+.orange-text {
+    color: #e9cf32;
+}
+
 .row {
     width: 100%;
     margin: 5px 0;
     display: inline-block;
-    font-size:20px;
+    font-size: 20px;
 }
-
 
 .switch {
     position: relative;
@@ -109,7 +116,7 @@ textarea.graph {
 
 /* Hide default HTML checkbox */
 .switch input {
-    display:none;
+    display: none;
 }
 
 /* The slider */

@@ -1,14 +1,16 @@
 var graphSize = 0;
 var edgesNumber = 1;
-var capacity = [];
+
 var nodeTypes = [];
+
+var capacity = [];
 var edgeId = [];
-var graph = [];//adjacency matrix
+var graph = []; //adjacency matrix
+
 var undirected = true;
 
 var nodes = new vis.DataSet();
 var edges = new vis.DataSet();
-
 
 function addNode(x, y, type) {
     nodeTypes.push(type || 0);
@@ -27,11 +29,11 @@ function addNode(x, y, type) {
             array.push(0);
         });
         capacity.push(new Array(graphSize + 1).fill(0));
-        graph.push(new Array(graphSize + 1).fill(false));;
+        graph.push(new Array(graphSize + 1).fill(false));
+        ;
         edgeId.push(new Array(graphSize + 1).fill(0));
     }
     graphSize++;
-    graphChanged();
 }
 
 function addEdge(from, to, cap) {
@@ -50,11 +52,6 @@ function addEdge(from, to, cap) {
         edgeId[to][from] = -edgesNumber;
     }
     edgesNumber++;
-    graphChanged();
-}
-
-function resetEdge(id) {
-    edges.update($.extend({id:id},edgeOptions[(undirected?EdgeType.NORMAL:EdgeType.DIRECTED)]));
 }
 
 function removeEdge(id) {
@@ -72,69 +69,68 @@ function removeEdge(id) {
             edgeId[edge.to][edge.from] = 0;
         }
         edges.remove(id);
-        graphChanged();
     }
 }
 
 function removeNode() {
     nodes.remove(graphSize - 1);
+    nodeTypes[graphSize - 1] = 0;
     graphSize--;
+}
+
+function resetEdgeStyle(id) {
+    edges.update($.extend({id: id}, edgeOptions[(undirected ? EdgeType.NORMAL : EdgeType.DIRECTED)]));
+}
+
+function switchNodeType(node, type) {
+    nodeTypes[node] = type;
+    nodes.update($.extend({id: node}, nodeOptions[type]));
 }
 
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function graphChanged() {
-    //todo:mb remove
-}
-
-function compareAndChange(newGraph) {
-    if (newGraph.size != graphSize) {
-        while (graphSize > newGraph.size) {
-            removeNode();
-        }
-        while (graphSize < newGraph.size) {
-            addNode();
-        }
+function rebuildGraph(newGraph) {
+    //rebuild graph with minimum changes
+    while (graphSize > newGraph.size) {
+        removeNode();
     }
+    while (graphSize < newGraph.size) {
+        addNode();
+    }
+
     for (var i = 0; i < edgesNumber; i++) {
         var edge = edges.get(i);
         if (!edge) {
             continue;
         }
-        var edgeToChange;
+        var newEdge;
         newGraph.edges.forEach(function (newEdge) {
             if (edge.from == newEdge.from && edge.to == newEdge.to) {
-                edgeToChange = newEdge;
+                newEdge = newEdge;
             }
             if (undirected && edge.from == newEdge.to && edge.to == newEdge.from) {
-                edgeToChange = newEdge;
+                newEdge = newEdge;
             }
         });
-        console.log(edge);
-        console.log(edgeToChange);
-        if (edgeToChange) {
-            if (edgeToChange.capacity != capacity[edge.from][edge.to]) {
-                capacity[edge.from][edge.to] = edgeToChange.capacity;
+        if (newEdge) {
+            if (newEdge.capacity != capacity[edge.from][edge.to]) {
+                capacity[edge.from][edge.to] = newEdge.capacity;
                 if (undirected) {
-                    capacity[edge.to][edge.from] = edgeToChange.capacity;
+                    capacity[edge.to][edge.from] = newEdge.capacity;
                 }
-                edges.update({id: edge.id, label: ' 0/' + edgeToChange.capacity + ' '});
+                edges.update({id: edge.id, label: ' 0/' + newEdge.capacity + ' '});
             }
         } else {
             removeEdge(edge.id);
         }
     }
-    console.log(newGraph.edges);
     newGraph.edges.forEach(function (newEdge) {
         if (!graph[newEdge.from][newEdge.to]) {
             addEdge(newEdge.from, newEdge.to, newEdge.capacity);
         }
     });
-    for (var i = 0; i < newGraph.edges.length; i++) {
-
-    }
 }
 
 function readGraphFromText(text) {
@@ -159,6 +155,22 @@ function readGraphFromText(text) {
     return graph;
 }
 
+function changeEdgeStyle(id ,color, label, width, arrowTo, arrowFrom) {
+    edges.update({
+        id: id, color: {color: color, highlight: color, hover: color}
+    });
+    edges.update({
+        id: id, label: label
+    });
+    edges.update({
+        id: id, width: width
+    });
+    edges.update({
+        id: id, arrows: {to: {enabled: arrowTo}, from: {enabled: arrowFrom}}
+    });
+
+}
+
 var EdgeType = {
     NORMAL: 0,
     DIRECTED: 1
@@ -180,7 +192,7 @@ function createNode(id, label, type) {
 
 var globalOptions = {
     physics: {
-        enabled: true,
+        enabled: false,
         stabilization: {
             enabled: true,
             iterations: 10,

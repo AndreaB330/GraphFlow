@@ -21,18 +21,18 @@ window.onload = function () {
     updateInformation();
 };
 
-function randomGraph() {
+function defaultGraph() {
     var size = 3;
-    addNode(-10, 0, 1);
-    for (var i = 1; i < size - 1; i++) {
-        addNode();
-    }
-    addNode(+10, 0, 2);
-
-    for (var j = 0; j < size * 2; j++) {
-        addEdge(getRandomInt(0, size - 1), getRandomInt(0, size - 1));
-    }
+    addNode(-150, 0, 1);
+    addNode(+150, 0, 2);
+    addNode(0, +130, 0);
+    addNode(0, -130, 0);
+    addEdge(0,2,8);
+    addEdge(2,1,10);
+    addEdge(0,3,10);
+    addEdge(3,1,8);
+    addEdge(3,2,2);
     dumpGraph();
 }
 
-randomGraph();
+defaultGraph();

@@ -16,7 +16,7 @@
         <div class = "row">
             Physics:
             <label class="switch">
-                <input type="checkbox" onchange="switchPhysics(this);" checked>
+                <input type="checkbox" onchange="switchPhysics(this);">
                 <span class="slider round"></span>
             </label>
         </div>
@@ -31,8 +31,11 @@
             <div class="button blue" style="margin-right:6px" onclick="resetGraph()">Reset</div>
             <div class="button red" onclick="runMaxFlow()">Run flow</div>
         </div>
-
         <textarea id="graph-input" class="graph" type="text"></textarea>
+        <div class = "row">
+            <span class="green-text">Green</span> - sources. </br>
+            <span class="orange-text">Orange</span> - sinks.
+        </div>
     </div>
     <div id="mynetwork"></div>
     <script type="text/javascript" src="script/menu.js"></script>
