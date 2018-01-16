@@ -22,7 +22,6 @@ window.onload = function () {
 };
 
 function defaultGraph() {
-    var size = 3;
     addNode(-150, 0, 1);
     addNode(+150, 0, 2);
     addNode(0, +130, 0);
