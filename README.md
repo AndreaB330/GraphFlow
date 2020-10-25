@@ -1,6 +1,6 @@
 # GraphFlow
 
-[GraphFlow](https://andreab330.github.io/GraphFlow/) - web application for graph visualization
+[GraphFlow](https://andrewb330.github.io/GraphFlow/) - web application for graph visualization
 
 ### Features
 * Graph editing interface
